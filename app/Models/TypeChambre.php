@@ -18,6 +18,8 @@ class TypeChambre extends Model
         'image',
     ];
 
+    protected $appends = ['image_url'];
+
     protected function casts(): array
     {
         return [
@@ -32,5 +34,13 @@ class TypeChambre extends Model
     public function chambres(): HasMany
     {
         return $this->hasMany(Chambre::class);
+    }
+
+    /**
+     * URL publique de l'image (disque "public", accessible via /storage/...).
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
     }
 }

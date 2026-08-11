@@ -16,6 +16,10 @@ class RoomImage extends Model
         'ordre',
     ];
 
+    // Sans $appends, l'accesseur "url" n'est calculé qu'à la demande en PHP
+    // et n'apparaît jamais dans la réponse JSON envoyée au frontend Angular.
+    protected $appends = ['url'];
+
     protected function casts(): array
     {
         return [

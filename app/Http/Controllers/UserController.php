@@ -67,6 +67,7 @@ class UserController extends Controller
             'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'phone' => 'nullable|string|max:30',
             'address' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:6',
             'role' => ['sometimes', Rule::in(['Administrateur', 'Receptionniste', 'Client'])],
         ]);
 
@@ -74,7 +75,13 @@ class UserController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $user->update($request->only(['name', 'email', 'phone', 'address']));
+        $donnees = $request->only(['name', 'email', 'phone', 'address']);
+
+        if ($request->filled('password')) {
+            $donnees['password'] = Hash::make($request->input('password'));
+        }
+
+        $user->update($donnees);
 
         if ($request->filled('role')) {
             $user->syncRoles([$request->input('role')]);

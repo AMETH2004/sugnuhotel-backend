@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -19,6 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
     ];
 
     /**
@@ -36,8 +39,16 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            // Si tu haches déjà avec Hash::make() dans le contrôleur, 
-            // vérifie qu'il N'Y A PAS 'password' => 'hashed' ici pour éviter le double-hachage !
+            // Le hachage est fait explicitement via Hash::make() dans AuthController,
+            // pas de cast 'hashed' ici pour éviter un double hachage.
         ];
+    }
+
+    /**
+     * Toutes les réservations passées par ce client.
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 }

@@ -13,5 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         // Appel du seeder des rôles et de l'administrateur
         $this->call(RoleEtAdminSeeder::class);
+
+        // Jeu de données de démonstration (comptes de test, chambres, services)
+        $this->call(HotelDemoSeeder::class);
     }
 }

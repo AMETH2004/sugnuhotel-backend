@@ -19,6 +19,8 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
+            'phone'    => 'nullable|string|max:30',
+            'address'  => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -33,6 +35,8 @@ class AuthController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'phone'    => $request->phone,
+            'address'  => $request->address,
         ]);
 
         // 3. Attribution du rôle "Client" en toute sécurité
@@ -46,10 +50,12 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // 5. Envoi de la réponse JSON au frontend Angular
+        // NB: "role" (chaîne) est renvoyé pour compatibilité avec le frontend existant,
+        // et "user.roles" (relation Spatie chargée) pour un accès plus standard côté client.
         return response()->json([
             'status'  => true,
             'message' => 'Utilisateur inscrit avec succès',
-            'user'    => $user,
+            'user'    => $user->load('roles'),
             'token'   => $token,
             'role'    => $user->getRoleNames()->first() ?? 'Client'
         ], 201);
@@ -86,7 +92,7 @@ class AuthController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'Connexion réussie',
-            'user'    => $user,
+            'user'    => $user->load('roles'),
             'token'   => $token,
             'role'    => $user->getRoleNames()->first() ?? 'Client'
         ], 200);

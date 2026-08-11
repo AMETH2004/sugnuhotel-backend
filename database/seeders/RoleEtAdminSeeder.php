@@ -11,18 +11,22 @@ class RoleEtAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // Création des 3 rôles
-        $roleAdmin = Role::create(['name' => 'Administrateur']);
-        $roleReceptionniste = Role::create(['name' => 'Receptionniste']);
-        $roleClient = Role::create(['name' => 'Client']);
+        // Création des 3 rôles (idempotent : ne recrée pas si déjà présents).
+        $roleAdmin = Role::firstOrCreate(['name' => 'Administrateur']);
+        Role::firstOrCreate(['name' => 'Receptionniste']);
+        Role::firstOrCreate(['name' => 'Client']);
 
-        // Création du compte Admin de test
-        $admin = User::create([
-            'name' => 'Admin SugnuHotel',
-            'email' => 'admin@sugnuhotel.com',
-            'password' => Hash::make('motdepasse123'),
-        ]);
-        
-        $admin->assignRole($roleAdmin);
+        // Compte Admin de test.
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@sugnuhotel.com'],
+            [
+                'name' => 'Admin SugnuHotel',
+                'password' => Hash::make('motdepasse123'),
+            ]
+        );
+
+        if (!$admin->hasRole($roleAdmin)) {
+            $admin->assignRole($roleAdmin);
+        }
     }
 }

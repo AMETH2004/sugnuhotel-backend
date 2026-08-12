@@ -48,6 +48,14 @@ class ReservationController extends Controller
             $query->whereDate('date_arrivee', $request->input('date'));
         }
 
+        // Utilisé par la vue calendrier : toutes les réservations chevauchant une période
+        // donnée (ex : un mois affiché), quel que soit leur statut sauf annulées.
+        if ($request->filled('periode_debut') && $request->filled('periode_fin')) {
+            $query->whereNotIn('statut', [Reservation::STATUT_ANNULEE])
+                ->where('date_arrivee', '<', $request->input('periode_fin'))
+                ->where('date_depart', '>', $request->input('periode_debut'));
+        }
+
         match ($request->input('periode')) {
             'a_venir' => $query->aVenir(),
             'en_cours' => $query->enCours(),
@@ -55,7 +63,9 @@ class ReservationController extends Controller
             default => null,
         };
 
-        return response()->json($query->orderByDesc('date_arrivee')->paginate(20));
+        $parPage = min((int) $request->input('par_page', 20), 500);
+
+        return response()->json($query->orderByDesc('date_arrivee')->paginate($parPage));
     }
 
     public function show(Request $request, Reservation $reservation)
